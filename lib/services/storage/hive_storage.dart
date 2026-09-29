@@ -1,28 +1,26 @@
-// Flutter Packages
+// Flutter packages
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_ce/hive_ce.dart';
 
-// (https://pub.dev/packages/hive)
+/// The one local box. `main` opens it before the first read, and it is a regular box (not lazy)
+/// so the controllers can read their defaults synchronously in `build()`.
 class HiveStorage {
-  final hiveBox = Hive.lazyBox("wikidadosBox");
+  static const boxName = "codesweeper";
+
+  final Box hiveBox = Hive.box(boxName);
+
+  String? read(String key) => hiveBox.get(key) as String?;
 
   Future<bool> save(String key, String value) async {
     try {
       await hiveBox.put(key, value);
-
       return true;
     } catch (error) {
       return false;
     }
   }
 
-  Future<String?> read(String key) async {
-    return await hiveBox.get(key);
-  }
-
-  void deleteKey(String key) async {
-    hiveBox.delete(key);
-  }
+  Future<void> deleteKey(String key) async => await hiveBox.delete(key);
 }
 
 final hiveStorageProvider = Provider<HiveStorage>((ref) => HiveStorage());

@@ -1,47 +1,55 @@
 // ignore_for_file: constant_identifier_names
 
-// Flutter Packages
+// Flutter packages
 import 'package:intl/intl.dart';
 
 // Enhanced Enums (https://dart.dev/language/enums)
 enum MyDateFormat {
   DATE_TIME_REQUEST('yyyy-MM-dd HH:mm:ss'),
-  DATE_TIME_REQUEST_NO_SEC('yyyy-MM-dd HH:mm'),
   DATE_TIME_RESULT('dd-MM-yyyy HH:mm:ss'),
   DATE_RESULT('dd-MM-yyyy'),
-  DATE_BR('dd/MM/yyyy'),
-  TIME_BR('HH:mm:ss'),
   TIME('HH:mm'),
-  DATE_TIME_BR('dd/MM/yyyy HH:mm:ss'),
-  DATE_TIME_BR_NO_SECONDS('dd/MM/yyyy HH:mm'),
-  DAY_MONTH_HOUR('EEE d MMM HH:mm:ss'),
-  DAY_MONTH_HOUR_NO_SECONDS('EEE d MMM HH:mm'),
   DAY_MONTH_YEAR('EEE d MMM yyyy'),
-  WEEK_DAY('EEEE'),
-  MONTH('MMMM'),
-  MONTH_DAY('MMM d'),
-  MONTH_YEAR('MMM yyyy'),
+  ONLY_DAY_MONTH_YEAR('d MMM yyyy'),
   MONTH_DAY_YEAR('MMM d, yyyy'),
   YEAR_MONTH_DAY('yyyy-MM-dd'),
-  MONGO_DB('yyyy-MM-ddTHH:mm:ssZ'),
-  YEAR_MONTH_DAY_HOUR_MINUTES_SECONDS('yyyyMMddHHmmss');
+  MONGO_DB('yyyy-MM-ddTHH:mm:ssZ');
 
   const MyDateFormat(this.strDate);
   final String strDate;
 
-  String? format(DateTime? value, {String? defValue}) {
+  String format(DateTime? value, {String defaultValue = ""}) {
     try {
-      return DateFormat(strDate, 'pt_Br').format(value!);
+      return DateFormat(strDate).format(value!);
     } catch (e) {
-      return defValue;
+      return defaultValue;
     }
   }
 
-  DateTime? parse(String? value, {DateTime? defValue}) {
+  /// Null when there is nothing to parse, where [parse] would answer "now" and make
+  /// an absent date read as today.
+  DateTime? tryParse(String? value) {
+    if (value == null || value.isEmpty) return null;
+
     try {
-      return DateFormat(strDate).parse(value!);
+      return parseStrict(value);
     } catch (e) {
-      return defValue;
+      return null;
     }
   }
+
+  DateTime parse(String? value, {DateTime? defaultValue}) {
+    try {
+      return parseStrict(value!);
+    } catch (e) {
+      return defaultValue ?? DateTime.now();
+    }
+  }
+
+  /// intl consumes the `Z` of an ISO stamp without applying the offset; only
+  /// `DateTime.parse` turns it into the right local instant.
+  DateTime parseStrict(String value) => switch (this) {
+    MONGO_DB => DateTime.parse(value).toLocal(),
+    _ => DateFormat(strDate).parse(value),
+  };
 }

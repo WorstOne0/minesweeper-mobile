@@ -1,9 +1,8 @@
-// ignore_for_file: must_be_immutable
+// Flutter packages
+import 'package:material_ui/material_ui.dart';
 
-// Flutter Packages
-import 'package:flutter/material.dart';
 // Utils
-import '/utils/string_extensions.dart';
+import '/utils/extensions/string_extensions.dart';
 
 SnackBar mySnackBar(
   Color color,
@@ -24,7 +23,10 @@ SnackBar mySnackBar(
     content: SizedBox(
       // Only work well for 3 maxLines.
       // User another thing for text bigger than that
-      height: maxLines == 2 ? 60 : 75,
+      height: switch (maxLines == 2) {
+        true => 60,
+        false => 75,
+      },
       child: Row(
         children: [
           Container(
@@ -60,7 +62,7 @@ SnackBar mySnackBar(
                 ],
               ),
             ),
-          )
+          ),
         ],
       ),
     ),

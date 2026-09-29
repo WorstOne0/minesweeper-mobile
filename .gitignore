@@ -44,3 +44,6 @@ app.*.map.json
 
 /lib/firebase_options.dart
 lib/firebase_options.dart
+# Signing
+/android/key.properties
+**/*.jks
